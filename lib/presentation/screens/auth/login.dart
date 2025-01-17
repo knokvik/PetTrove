@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pettrove/bloc/auth/auth_bloc.dart';
 import 'package:pettrove/bloc/auth/auth_event.dart';
 import 'package:pettrove/bloc/auth/auth_state.dart';
+import 'package:pettrove/presentation/screens/auth/forgot.dart';
 import 'package:pettrove/presentation/screens/auth/signup.dart';
 import 'package:pettrove/presentation/screens/home.dart';
 
@@ -41,7 +42,7 @@ class SignInScreen extends StatelessWidget {
                     // const SizedBox(height: 16),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                     SignInForm(),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -64,6 +65,20 @@ class SignInScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     const NoAccountText(),
+                     GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
+                            );
+                      },
+                      child: const Text(
+                        "Forgot Password",
+                        style: TextStyle(
+                          color: Color.fromRGBO(140, 207, 99, 1),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -176,7 +191,7 @@ class SignInForm extends StatelessWidget {
               },
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 22),
 
             // Continue Button
             ElevatedButton(
@@ -261,6 +276,7 @@ class NoAccountText extends StatelessWidget {
           ),
         ),
       ],
+      
     );
   }
 }

@@ -29,7 +29,6 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _checkLoginStatus() async {
-    await _authRepository.logout();
     bool isLoggedIn = await _authRepository.isLoggedIn();
     setState(() {
       _isLoggedIn = isLoggedIn;
@@ -42,6 +41,9 @@ class _MyAppState extends State<MyApp> {
       providers: [
         BlocProvider<LoginBloc>(
           create: (context) => LoginBloc(authRepository: _authRepository),
+        ),
+        BlocProvider(
+          create: (context) => RegisterBloc(authRepository: AuthRepository()),
         ),
       ],
       child: MaterialApp(

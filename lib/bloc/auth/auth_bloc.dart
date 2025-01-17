@@ -38,3 +38,30 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     });
   }
 }
+// register_bloc.dart
+class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
+  final AuthRepository authRepository;
+
+  RegisterBloc({required this.authRepository}) : super(RegisterState.initial()) {
+    on<RegisterSubmitted>((event, emit) async {
+      emit(state.copyWith(isSubmitting: true));
+
+      try {
+        final isSuccess = await authRepository.register(
+          name: event.name,
+          email: event.email,
+          password: event.password,
+          phone: event.phone,
+        );
+
+        if (isSuccess) {
+          emit(state.copyWith(isSubmitting: false, isSuccess: true));
+        } else {
+          emit(state.copyWith(isSubmitting: false, isFailure: true));
+        }
+      } catch (_) {
+        emit(state.copyWith(isSubmitting: false, isFailure: true));
+      }
+    });
+  }
+}

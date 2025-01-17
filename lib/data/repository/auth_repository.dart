@@ -6,18 +6,11 @@ class AuthRepository {
 
     // Trim to avoid whitespace issues
     if (email.trim() == "test@example.com" && password.trim() == "password123") {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);  // Save login state
+      // final prefs = await SharedPreferences.getInstance();
+      // await prefs.setBool('isLoggedIn', true);  // Save login state
       return true;
     }
     return false;
-  }
-
-  Future<bool> register({required String name, required String email, required String password}) async {
-    await Future.delayed(const Duration(seconds: 2));  
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', true);  // User is logged in automatically after registration
-    return true;
   }
 
   Future<bool> isLoggedIn() async {
@@ -28,5 +21,19 @@ class AuthRepository {
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('isLoggedIn');
+  }
+
+  Future<bool> register({
+    required String name,
+    required String email,
+    required String password,
+    required String phone,
+  }) async {
+
+      print("$name\n$email\n$password\n$phone");
+      
+      await Future.delayed(const Duration(seconds: 2));
+
+    return true;  
   }
 }

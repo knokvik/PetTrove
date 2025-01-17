@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 // TODO: add flutter_svg package
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pettrove/bloc/auth/auth_bloc.dart';
+import 'package:pettrove/bloc/auth/auth_event.dart';
+import 'package:pettrove/bloc/auth/auth_state.dart';
+import 'package:pettrove/data/repository/auth_repository.dart';
 import 'package:pettrove/presentation/screens/auth/login.dart';
+import 'package:pettrove/presentation/screens/home.dart';
 
 class ComplateProfileScreen extends StatelessWidget {
   const ComplateProfileScreen({super.key});
@@ -36,7 +42,7 @@ class ComplateProfileScreen extends StatelessWidget {
                     ),
                     // const SizedBox(height: 16),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                    const ComplateProfileForm(),
+                    const CompleteProfileForm(),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.02),
         
                     const Text(
@@ -95,118 +101,170 @@ class ExistingUser extends StatelessWidget {
     );
   }
 }
+// CompleteProfileForm
+class CompleteProfileForm extends StatefulWidget {
+  const CompleteProfileForm({super.key});
 
-class ComplateProfileForm extends StatelessWidget {
-  const ComplateProfileForm({super.key});
+  @override
+  _CompleteProfileFormState createState() => _CompleteProfileFormState();
+}
+
+class _CompleteProfileFormState extends State<CompleteProfileForm> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      child: Column(
-        children: [
-          TextFormField(
-            onSaved: (firstName) {},
-            onChanged: (firstName) {},
-            textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
-                hintText: "Enter your first name",
-                labelText: "First Name",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                hintStyle: const TextStyle(color: Color(0xFF757575)),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                suffix: SvgPicture.string(userIcon),
-                border: authOutlineInputBorder,
-                enabledBorder: authOutlineInputBorder,
-                focusedBorder: authOutlineInputBorder.copyWith(
-                    borderSide: const BorderSide(color: Color.fromRGBO(140, 207, 99, 1),))),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: TextFormField(
-              onSaved: (lastName) {},
-              onChanged: (lastName) {},
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                  hintText: "Enter your last name",
-                  labelText: "Last Name",
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  hintStyle: const TextStyle(color: Color(0xFF757575)),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  suffix: SvgPicture.string(userIcon),
-                  border: authOutlineInputBorder,
-                  enabledBorder: authOutlineInputBorder,
-                  focusedBorder: authOutlineInputBorder.copyWith(
-                      borderSide: const BorderSide(color: Color.fromRGBO(140, 207, 99, 1),))),
-            ),
-          ),
-          TextFormField(
-            onSaved: (password) {},
-            onChanged: (password) {},
-            keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-                hintText: "Enter your phone number",
-                labelText: "Phone Number",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                hintStyle: const TextStyle(color: Color(0xFF757575)),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                suffix: SvgPicture.string(phoneIcon),
-                border: authOutlineInputBorder,
-                enabledBorder: authOutlineInputBorder,
-                focusedBorder: authOutlineInputBorder.copyWith(
-                    borderSide: const BorderSide(color: Color.fromRGBO(140, 207, 99, 1),))),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: TextFormField(
-              onSaved: (address) {},
-              onChanged: (address) {},
-              decoration: InputDecoration(
-                  hintText: "Enter your address",
-                  labelText: "Address",
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  hintStyle: const TextStyle(color: Color(0xFF757575)),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  suffix: SvgPicture.string(locationPointIcon),
-                  border: authOutlineInputBorder,
-                  enabledBorder: authOutlineInputBorder,
-                  focusedBorder: authOutlineInputBorder.copyWith(
-                      borderSide: const BorderSide(color: Color.fromRGBO(140, 207, 99, 1),))),
-            ),
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: Color.fromRGBO(158, 232, 112, 1),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 48),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(35)),
+    return BlocListener<RegisterBloc, RegisterState>(
+      listener: (context, state) {
+        if (state.isSubmitting) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => const Center(
+              child: CircularProgressIndicator(
+                color: Color.fromRGBO(22, 51, 0, 1),
+                strokeWidth: 4,
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: const Text("Continue",style: TextStyle(color: Colors.black),),
+          );
+        } else if (state.isSuccess) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Profile Updated Successfully")),
+          );
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Home()),
+            (route) => false,
+          );
+        } else if (state.isFailure) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Profile Update Failed. Please try again.")),
+          );
+        }
+      },
+      child: Form(
+        child: Column(
+          children: [
+            TextFormField(
+              controller: nameController,
+              textInputAction: TextInputAction.next,
+              decoration: InputDecoration(
+                hintText: "Enter your name",
+                labelText: "Name",
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                hintStyle: const TextStyle(color: Color(0xFF757575)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                border: authOutlineInputBorder,
+                enabledBorder: authOutlineInputBorder,
+                focusedBorder: authOutlineInputBorder.copyWith(
+                  borderSide: const BorderSide(color: Color.fromRGBO(140, 207, 99, 1)),
+                ),
+              ),
             ),
-          )
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: TextFormField(
+                controller: emailController,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  hintText: "Enter your email",
+                  labelText: "Email",
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  hintStyle: const TextStyle(color: Color(0xFF757575)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  border: authOutlineInputBorder,
+                  enabledBorder: authOutlineInputBorder,
+                  focusedBorder: authOutlineInputBorder.copyWith(
+                    borderSide: const BorderSide(color: Color.fromRGBO(140, 207, 99, 1)),
+                  ),
+                ),
+              ),
+            ),
+            TextFormField(
+              controller: passwordController,
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                hintText: "Enter your password",
+                labelText: "Password",
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                hintStyle: const TextStyle(color: Color(0xFF757575)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                border: authOutlineInputBorder,
+                enabledBorder: authOutlineInputBorder,
+                focusedBorder: authOutlineInputBorder.copyWith(
+                  borderSide: const BorderSide(color: Color.fromRGBO(140, 207, 99, 1)),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: TextFormField(
+                keyboardType: TextInputType.phone,
+                controller: phoneController,
+                decoration: InputDecoration(
+                  hintText: "Enter your phone",
+                  labelText: "Phone",
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  hintStyle: const TextStyle(color: Color(0xFF757575)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  border: authOutlineInputBorder,
+                  enabledBorder: authOutlineInputBorder,
+                  focusedBorder: authOutlineInputBorder.copyWith(
+                    borderSide: const BorderSide(color: Color.fromRGBO(140, 207, 99, 1)),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () {
+                final name = nameController.text;
+                final email = emailController.text;
+                final password = passwordController.text;
+                final phone = phoneController.text;
+
+                context.read<RegisterBloc>().add(RegisterSubmitted(
+                  name: name,
+                  email: email,
+                  password: password,
+                  phone: phone,
+                ));
+              },
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: Color.fromRGBO(158, 232, 112, 1),
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 48),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(35)),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: const Text("Continue", style: TextStyle(color: Colors.black)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 }
+
 
 // Icons
 const userIcon =

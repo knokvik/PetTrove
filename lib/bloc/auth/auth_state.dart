@@ -46,3 +46,38 @@ class LoginState extends Equatable {
   @override
   List<Object> get props => [email, password, isSubmitting, isSuccess, isFailure];
 }
+
+// register_state.dart
+class RegisterState {
+  final bool isSubmitting;
+  final bool isSuccess;
+  final bool isFailure;
+
+  const RegisterState({
+    required this.isSubmitting,
+    required this.isSuccess,
+    required this.isFailure,
+  });
+
+  // Factory constructor for initial state
+  factory RegisterState.initial() {
+    return const RegisterState(
+      isSubmitting: false,
+      isSuccess: false,
+      isFailure: false,
+    );
+  }
+
+  // Copy with method to modify state values
+  RegisterState copyWith({
+    bool? isSubmitting,
+    bool? isSuccess,
+    bool? isFailure,
+  }) {
+    return RegisterState(
+      isSubmitting: isSubmitting ?? this.isSubmitting,
+      isSuccess: isSuccess ?? this.isSuccess,
+      isFailure: isFailure ?? this.isFailure,
+    );
+  }
+}

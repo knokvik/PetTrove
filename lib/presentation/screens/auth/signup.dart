@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// TODO: add flutter_svg package
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pettrove/bloc/auth/auth_bloc.dart';
 import 'package:pettrove/bloc/auth/auth_event.dart';
 import 'package:pettrove/bloc/auth/auth_state.dart';
-import 'package:pettrove/data/repository/auth_repository.dart';
 import 'package:pettrove/presentation/screens/auth/login.dart';
-import 'package:pettrove/presentation/screens/home.dart';
+import 'package:pettrove/presentation/screens/current_page.dart';
 
 class ComplateProfileScreen extends StatelessWidget {
   const ComplateProfileScreen({super.key});
@@ -137,7 +134,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
           );
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => Home()),
+            MaterialPageRoute(builder: (context) => CurrentPage()),
             (route) => false,
           );
         } else if (state.isFailure) {

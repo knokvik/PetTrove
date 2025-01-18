@@ -4,9 +4,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pettrove/bloc/auth/auth_bloc.dart';
 import 'package:pettrove/bloc/auth/auth_event.dart';
 import 'package:pettrove/bloc/auth/auth_state.dart';
-import 'package:pettrove/presentation/screens/auth/forgot.dart';
+import 'package:pettrove/presentation/screens/auth/_auth/forgot.dart';
 import 'package:pettrove/presentation/screens/auth/signup.dart';
-import 'package:pettrove/presentation/screens/home.dart';
+import 'package:pettrove/presentation/screens/current_page.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
@@ -120,7 +120,7 @@ class SignInForm extends StatelessWidget {
           );
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => Home()),
+            MaterialPageRoute(builder: (context) => CurrentPage()),
             (route) => false, // This removes all previous routes
           );
 

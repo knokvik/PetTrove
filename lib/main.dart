@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pettrove/cubit/products.dart';
 import 'package:pettrove/data/repository/auth_repository.dart';
+import 'package:pettrove/data/repository/product_repository.dart';
 import 'package:pettrove/presentation/screens/auth/login.dart';
-import 'package:pettrove/presentation/screens/home.dart';
+import 'package:pettrove/presentation/screens/current_page.dart';
 import 'package:pettrove/bloc/auth/auth_bloc.dart';
 
 void main () async {
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -20,6 +21,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool _isLoggedIn = false;
   final AuthRepository _authRepository = AuthRepository();
+  final ProductRepository _productRepository = ProductRepository();
 
   @override
   void initState() {
@@ -42,9 +44,10 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<LoginBloc>(
           create: (context) => LoginBloc(authRepository: _authRepository),
         ),
-        BlocProvider(
+        BlocProvider<RegisterBloc>(
           create: (context) => RegisterBloc(authRepository: AuthRepository()),
         ),
+        BlocProvider(create: (context) => ProductCubit( _productRepository )),
       ],
       child: MaterialApp(
         title: 'PetShop App',
@@ -53,7 +56,7 @@ class _MyAppState extends State<MyApp> {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: _isLoggedIn ? Home() : const SignInScreen(),
+        home: _isLoggedIn ? CurrentPage() : const SignInScreen(),
       ),
     );
   }

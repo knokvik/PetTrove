@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pettrove/cubit/cart_cubit.dart';
 import 'package:pettrove/models/products.dart';
 
 // Assuming Product class is defined elsewhere, with fields like title, description, imagePath, etc.
@@ -112,7 +114,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 borderRadius: BorderRadius.all(Radius.circular(35)),
               ),
             ),
-            onPressed: () {},
+            onPressed: () {
+              final cartCubit = context.read<CartCubit>();
+              cartCubit.addProductToCart(widget.product);
+              final cartItems = cartCubit.state.cartItems;
+              print('Current Cart Items:');
+              for (var item in cartItems) {
+                print('Product: ${item.title}, Price: ${item.price}');
+              }
+            },
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 12),
               child: Text( "Add To Cart", 
@@ -176,7 +186,7 @@ class ProductDescription extends StatelessWidget {
               color: Color.fromRGBO(22, 51, 0, 1),
               height: 1.2
             ),
-            product.name, // Use dynamic product title
+            product.title, // Use dynamic product title
           ),
         ),
         Padding(

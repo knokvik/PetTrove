@@ -41,6 +41,11 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   dotted_border: ^2.1.0
   http: ^1.2.2
+  google_maps_flutter: ^2.10.0
+  webview_flutter: ^4.10.0
+  webview_flutter_android: ^4.3.1
+  webview_flutter_wkwebview: ^3.17.0
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

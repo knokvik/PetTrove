@@ -52,7 +52,6 @@ class ProductCubit extends Cubit<ProductState> {
   List<Product> filterProducts(String category) {
   if (state is ProductLoaded) {
     final allProducts = (state as ProductLoaded).products;
-    // Filter the products based on the category
     return allProducts.where((product) => product.category == category).toList();
   }
   return []; 

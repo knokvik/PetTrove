@@ -1,10 +1,39 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pettrove/data/repository/auth_repository.dart';
 import 'package:pettrove/presentation/screens/auth/login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+
+  String currentUser = "Loading..."; // Default text while loading
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userData = prefs.getString('currentUser');
+    if (userData != null) {
+      final Map<String, dynamic> user = jsonDecode(userData);
+      setState(() {
+        currentUser = user['name'] ?? "Unknown User";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
             const ProfilePic(),
             SizedBox(height: 15),
              Text(
-            'NIRAJ RAJENDRA\n        NAPHADE',
+            currentUser,
             style: TextStyle(
               fontSize: 31,
               fontWeight: FontWeight.w600, 

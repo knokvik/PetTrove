@@ -1,12 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pettrove/cubit/pages.dart';
 import 'package:pettrove/cubit/products.dart';
 import 'package:pettrove/data/repository/product_repository.dart';
+import 'package:pettrove/presentation/screens/pages/_pages/upload.dart';
 import 'package:pettrove/presentation/screens/pages/blog.dart';
 import 'package:pettrove/presentation/screens/pages/cart.dart';
 import 'package:pettrove/presentation/screens/pages/home.dart';
 import 'package:pettrove/presentation/screens/pages/profile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CurrentPage extends StatefulWidget {
   @override
@@ -14,18 +18,30 @@ class CurrentPage extends StatefulWidget {
 }
 
 class _CurrentPageState extends State<CurrentPage> {
+  String currentUser = "Loading...";
   final ProductRepository productRepository = ProductRepository();
 
   @override
   void initState() {
     super.initState();
     context.read<ProductCubit>().fetchProducts();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userData = prefs.getString('currentUser');
+    if (userData != null) {
+      final Map<String, dynamic> user = jsonDecode(userData);
+      setState(() {
+        currentUser = user['name'] ?? "Unknown User";
+      });
+    }
   }
 
   final List<Widget> pages = [
     Center(child: Home(productRepository: ProductRepository())),
     Center(child: BlogPage()),
-    Center(child: Text('Profile')),
     Center(child: CartScreen()),
     Center(child: ProfileScreen()),
   ];
@@ -72,8 +88,8 @@ class _CurrentPageState extends State<CurrentPage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Greeselia M.', style: TextStyle(color: Colors.black, fontSize: 14)),
-                          Text('Solo, Central Java', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          Text(currentUser, style: TextStyle(color: Colors.black, fontSize: 14)),
+                          Text('PetTrove User', style: TextStyle(color: Colors.grey, fontSize: 12)),
                         ],
                       ),
                     ],
@@ -86,7 +102,7 @@ class _CurrentPageState extends State<CurrentPage> {
             Padding(
               padding: const EdgeInsets.only(right: 20),
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 1),
+                padding: EdgeInsets.symmetric(horizontal: 3.5 , vertical: 3),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(45),
@@ -111,7 +127,7 @@ class _CurrentPageState extends State<CurrentPage> {
         ),
         body: BlocBuilder<HomePageCubit, int>( // Use the HomePageCubit
           builder: (context, selectedIndex) {
-            return pages[selectedIndex]; // Update page based on selected index
+            return pages[selectedIndex];
           },
         ),
         bottomNavigationBar: BlocBuilder<HomePageCubit, int>( // Listen to state changes
@@ -150,6 +166,40 @@ class _CurrentPageState extends State<CurrentPage> {
     );
   }
 
+  void showComposeBlogDialog(BuildContext context) {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: "Compose Blog",
+    transitionDuration: Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.9, // 90% of screen width
+              maxHeight: MediaQuery.of(context).size.height * 0.6, // 80% of screen height
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(35),
+            ),
+            child: ComposeBlogPage(), // Your compose blog widget
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: animation,
+        child: child,
+      );
+    },
+  );
+}
+
+
   // Update the _buildNavItem function to accept the BuildContext explicitly
   Widget _buildNavItem(BuildContext context, IconData icon, int index, int selectedIndex, {bool isCenter = false}) {
 
@@ -157,11 +207,11 @@ class _CurrentPageState extends State<CurrentPage> {
   
   return GestureDetector(
     onTap: () {
-      context.read<HomePageCubit>().updateIndex(index); // Update index when tapped
+      index == 2 ? showComposeBlogDialog(context) : context.read<HomePageCubit>().updateIndex(index);
     },
     child: AnimatedContainer(
       duration: Duration(milliseconds: 200),
-        width: isSelected ? 55 : 45,   // Increase size when selected
+        width: isSelected ? 55 : 45,  
         height: isSelected ? 55 : 45,
       decoration: BoxDecoration(
         color: index == 2 ? Color.fromRGBO(159, 232, 112,1) : Colors.transparent,

@@ -19,7 +19,14 @@ class AuthRepository {
     );
 
     if (response.statusCode == 200) {
+      final responseBody = json.decode(response.body);
       final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('currentUser', jsonEncode({
+        'id': responseBody['userId'],
+        'name': responseBody['name'],
+        'email': responseBody['email'],
+      }));
       await prefs.setBool('isLoggedIn', true);
       return true;
     }
@@ -40,6 +47,7 @@ class AuthRepository {
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('isLoggedIn');
+    await prefs.remove('currentUser');
   }
 
   Future<bool> register({
@@ -64,10 +72,18 @@ class AuthRepository {
       }),
     );
 
-    if (response.statusCode == 201) {
-      print("Registration Successful");
+     if (response.statusCode == 200) {
+      final responseBody = json.decode(response.body);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('currentUser', jsonEncode({
+        'id': responseBody['userId'],
+        'name': responseBody['name'],
+        'email': responseBody['email'],
+      }));
+      print("User logged in: ${responseBody['name']}");
       return true;
-    } else {
+      } else {
       print("Registration Failed: ${response.body}");
       return false;
     }

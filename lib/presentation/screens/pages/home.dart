@@ -1,6 +1,6 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pettrove/cubit/products.dart';
 import 'package:pettrove/data/repository/product_repository.dart';
 import 'package:pettrove/models/products.dart';
@@ -12,6 +12,26 @@ class Home extends StatelessWidget {
 
   // Constructor to initialize ProductRepository
   Home({Key? key, required this.productRepository}) : super(key: key);
+
+   late GoogleMapController mapController;
+
+    final LatLng sahasNgoLocation = LatLng(18.523339, 73.8845124);
+
+  final CameraPosition _initialPosition = CameraPosition(
+    target: LatLng(18.6376282, 73.760302,),
+    zoom: 12,
+  );
+
+  final List<Marker> _markers = [
+    Marker(
+      markerId: MarkerId('sahas_ngo'),
+      position: LatLng(18.523339, 73.8845124),
+      infoWindow: InfoWindow(
+        title: 'Sahas NGO',
+        snippet: 'A wonderful place for pets!',
+      ),
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -25,48 +45,102 @@ class Home extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 4),
+                child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(50),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(9, 0, 0, 0), // Shadow color
+                      blurRadius: 3,
+                      offset: Offset(1,3), // Shadow offset
+                    ),
+                  ],
+                ),
                 child: TextField(
                   decoration: InputDecoration(
-                    hintText: ' What do you need for your pet?',
-                    focusColor: Color.fromRGBO(22, 51, 0, 1),
-                    fillColor: Color.fromRGBO(22, 51, 0, 1),
-                    hoverColor: Color.fromRGBO(22, 51, 0, 1),
+                    hintText: '   What do you need for your pet?',
+                    hintStyle: TextStyle(
+                      color: const Color.fromARGB(255, 83, 83, 83),
+                      fontSize: 15,
+                    ),
                     prefixIcon: Padding(
-                      padding: const EdgeInsets.only(left: 18), // Move icon slightly right
-                      child: Icon(
-                        Icons.search,
-                        color: Color.fromRGBO(22, 51, 0, 1), // Set icon color to black
-                      ),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 25),
-                  ),
-                ),
-              ),  
-              SizedBox(height: 10),
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Color.fromRGBO(159, 232, 112, 1),
-                  borderRadius: BorderRadius.circular(35),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Get 10% off by TRANSFER pet food',
-                        style: TextStyle(
-                          fontSize: 35,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.2,
-                          fontFamily: "Neue Plak",
-                          color: Color.fromRGBO(22, 51, 0, 1),
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Color.fromRGBO(159, 232, 112, 1),
+                          shape: BoxShape.circle,
+                        ),
+                        padding: EdgeInsets.all(15),
+                        child: Icon(
+                          Icons.search,
+                          color: const Color.fromARGB(205, 34, 33, 33),
                         ),
                       ),
                     ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 24,),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: const Color.fromRGBO(164, 164, 164, 0.273)),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                  ),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black,
+                  ),
+                ),
+              )
+              ),  
+              SizedBox(height: 10),
+               Container(
+                
+                margin: EdgeInsets.symmetric( horizontal: 6 ),
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(35),
+                  border: Border.all(
+                    color: const Color.fromARGB(1, 158, 158, 158).withOpacity(0.5), // Border color
+                    width: 0.4, // Border width
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(23, 91, 91, 91), // Shadow color
+                      blurRadius: 3,
+                      offset: Offset(3,3), // Shadow offset
+                    ),
                   ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(35),
+                  child: GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: sahasNgoLocation,
+                      zoom: 15, // Adjusted zoom for better visibility
+                    ),
+                    markers: {
+                      Marker(
+                        markerId: MarkerId('sahasNgo'),
+                        position: sahasNgoLocation,
+                        infoWindow: InfoWindow(
+                          title: 'Sahas NGO',
+                          snippet: 'Location of Sahas NGO',
+                        ),
+                        icon: BitmapDescriptor.defaultMarkerWithHue(
+                          BitmapDescriptor.hueRed, // Red marker color
+                        ),
+                      ),
+                    },
+                    onMapCreated: (GoogleMapController controller) {
+                      mapController = controller;
+                    },
+                  ),
                 ),
               ),
               SizedBox(height: 20),

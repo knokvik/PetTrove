@@ -108,7 +108,7 @@ class ProductPage extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    product.name,
+                                    product.title,
                                     maxLines: 1,
                                     style: TextStyle(
                                       fontSize: 20,

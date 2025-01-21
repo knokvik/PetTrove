@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pettrove/cubit/cart_cubit.dart';
+import 'package:pettrove/cubit/cart_state.dart';
 import 'package:pettrove/models/products.dart';
 
 class CartScreen extends StatefulWidget {
@@ -15,48 +19,96 @@ class _CartScreenState extends State<CartScreen> {
       backgroundColor: const Color(0xFFF5F6F9),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 22),
-        // child: ListView.builder(
-        //   itemCount: demoCarts.length,
-        //   itemBuilder: (context, index) => Padding(
-        //     padding: const EdgeInsets.symmetric(vertical: 5),
-        //     child: Dismissible(
-        //       key: Key(demoCarts[index].product.id.toString()),
-        //       direction: DismissDirection.endToStart,
-        //       onDismissed: (direction) {
-        //         setState(() {
-        //           demoCarts.removeAt(index);
-        //         });
-        //       },
-        //       background: Container(
-        //         padding: const EdgeInsets.symmetric(horizontal: 20),
-        //         decoration: BoxDecoration(
-        //           color: const Color(0xFFFFE6E6),
-        //           borderRadius: BorderRadius.circular(15),
-        //         ),
-        //         child: Row(
-        //           children: [
-        //             const Spacer(),
-        //             SvgPicture.string(trashIcon),
-        //           ],
-        //         ),
-        //       ),
-        //       child: CartCard(cart: demoCarts[index]),
-        //     ),
-        //   ),
-        // ),
+        child: BlocBuilder<CartCubit, CartState>(
+          builder: (context, state) {
+            if (state is CartLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is CartLoaded) {
+              if (state.cartItems.isEmpty) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Empty Cart!',
+                      style: TextStyle(
+                        fontFamily: "Neue Plak",
+                        fontSize: 30,
+                      )
+                    ),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric( horizontal: 30 ),
+                      child: Text(
+                        "It seems like you haven't added anything to your cart yet. Let's find some great items to fill it up!",
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return ListView.builder(
+                itemCount: state.cartItems.length,
+                itemBuilder: (context, index) {
+                  final product = state.cartItems[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: Dismissible(
+                      key: Key(product.id),
+                      direction: DismissDirection.endToStart,
+                      onDismissed: (direction) {
+                        context.read<CartCubit>().removeProduct(product);
+                      },
+                      background: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFE6E6),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          children: [
+                            const Spacer(),
+                            SvgPicture.string(trashIcon),
+                          ],
+                        ),
+                      ),
+                      child: CartCard(product: product),
+                    ),
+                  );
+                },
+              );
+            } else if (state is CartError) {
+              return Center(child: Text(state.errorMessage));
+            }
+            else {
+              return const Center(child: Text("Error loading cart"));
+            }
+          },
+        ),
       ),
-      bottomNavigationBar: const CheckoutCard(),
+      bottomNavigationBar: BlocBuilder<CartCubit, CartState>(
+        builder: (context, state) {
+          if (state is CartLoaded) {
+            return CheckoutCard(
+              subtotal: state.subtotal,
+              shippingFee: state.shippingFee,
+              discount: state.discount,
+              total: state.total,
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 }
 
 class CartCard extends StatelessWidget {
+  final Product product;
+
   const CartCard({
     Key? key,
-    required this.cart,
+    required this.product,
   }) : super(key: key);
-
-  final Cart cart;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +124,7 @@ class CartCard extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Image.network(cart.product.imagePath[0]),
+              child: Image.network(product.imagePath),
             ),
           ),
         ),
@@ -81,21 +133,18 @@ class CartCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              cart.product.name,
+              product.title,
               style: const TextStyle(color: Colors.black, fontSize: 16),
               maxLines: 2,
             ),
             const SizedBox(height: 8),
             Text.rich(
               TextSpan(
-                text: "\$${cart.product.price}",
+                text: "\$${product.price}",
                 style: const TextStyle(
-                    fontWeight: FontWeight.w600, color: Color.fromRGBO(137, 204, 95, 1),),
-                children: [
-                  TextSpan(
-                      text: " x${cart.numOfItem}",
-                      style: Theme.of(context).textTheme.bodyLarge),
-                ],
+                  fontWeight: FontWeight.w600,
+                  color: Color.fromRGBO(137, 204, 95, 1),
+                ),
               ),
             )
           ],
@@ -106,53 +155,66 @@ class CartCard extends StatelessWidget {
 }
 
 class CheckoutCard extends StatelessWidget {
+  final double subtotal;
+  final double shippingFee;
+  final double discount;
+  final double total;
+
   const CheckoutCard({
     Key? key,
+    required this.subtotal,
+    required this.shippingFee,
+    required this.discount,
+    required this.total,
   }) : super(key: key);
 
   @override
-Widget build(BuildContext context) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-    child: Container(
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Container(
         decoration: BoxDecoration(
-          color: Colors.white, // Set background color to white
-          borderRadius: BorderRadius.circular(20), // Set border radius
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color.fromARGB(85, 214, 200, 200), // Set border color
-            width: 1, // Set border width
+            color: const Color.fromARGB(85, 214, 200, 200),
+            width: 1,
           ),
         ),
-        padding: const EdgeInsets.all(16), // Add padding inside the container
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 6),
-            Text(
+            const Text(
               "Order Summary",
-              style: TextStyle(fontSize: 16, fontFamily: "Neue Plak" , fontWeight: FontWeight.bold , letterSpacing: 0.8 , color: const Color.fromARGB(255, 59, 56, 56)),
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: "Neue Plak",
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.8,
+                color: Color.fromARGB(255, 59, 56, 56),
+              ),
             ),
             const SizedBox(height: 6),
-            _buildSummaryRow("Subtotal: 200"),
-            _buildSummaryRow("Shipping Fee : 40", highlight: "50" == "Free"),
-            _buildSummaryRow("Discount : 40%"),
+            _buildSummaryRow("Subtotal:", subtotal.toStringAsFixed(2)),
+            _buildSummaryRow("Shipping Fee:", shippingFee.toStringAsFixed(2)),
+            _buildSummaryRow("Discount:", discount.toStringAsFixed(2)),
             const Divider(),
-            _buildSummaryRow("Total (Including VAT) : 3400"),
-            _buildSummaryRow("Estimated VAT"),
+            _buildSummaryRow("Total (Including VAT):", total.toStringAsFixed(2)),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromRGBO(159, 232, 112, 1),
+                  backgroundColor: const Color.fromRGBO(159, 232, 112, 1),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(35),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: Text(
+                child: const Text(
                   "Continue",
                   style: TextStyle(
                     color: Color.fromRGBO(22, 51, 0, 1),
@@ -165,11 +227,10 @@ Widget build(BuildContext context) {
           ],
         ),
       ),
-  );
-}
+    );
+  }
 
-
-   Widget _buildSummaryRow(String label, {bool highlight = false}) {
+  Widget _buildSummaryRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -177,33 +238,17 @@ Widget build(BuildContext context) {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 14 , color: const Color.fromARGB(255, 67, 66, 63)),
+            style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 67, 66, 63)),
           ),
           Text(
-            "348",
-            style: TextStyle(
-              fontSize: 14,
-              color: highlight ? Colors.green : const Color.fromARGB(255, 66, 62, 62),
-              fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
-            ),
+            value,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold , color: Color.fromARGB(255, 66, 62, 62)),
           ),
         ],
       ),
     );
   }
 }
-
-
-class Cart {
-  final Product product;
-  final int numOfItem;
-
-  Cart({required this.product, required this.numOfItem});
-}
-
-
-const String description =
-    "Wireless Controller for PS4™ gives you what you want in your gaming from over precision control your games to sharing …";
 
 const receiptIcon =
     '''<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -214,5 +259,4 @@ const receiptIcon =
 const trashIcon =
     '''<svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M10.7812 15.6604V7.16981C10.7812 6.8566 11.0334 6.60377 11.3438 6.60377C11.655 6.60377 11.9062 6.8566 11.9062 7.16981V15.6604C11.9062 15.9736 11.655 16.2264 11.3438 16.2264C11.0334 16.2264 10.7812 15.9736 10.7812 15.6604ZM6.09375 15.6604V7.16981C6.09375 6.8566 6.34594 6.60377 6.65625 6.60377C6.9675 6.60377 7.21875 6.8566 7.21875 7.16981V15.6604C7.21875 15.9736 6.9675 16.2264 6.65625 16.2264C6.34594 16.2264 6.09375 15.9736 6.09375 15.6604ZM15 16.6038C15 17.8519 13.9903 18.8679 12.75 18.8679H5.25C4.00969 18.8679 3 17.8519 3 16.6038V3.96226H15V16.6038ZM7.21875 1.50943C7.21875 1.30094 7.38656 1.13208 7.59375 1.13208H10.4062C10.6134 1.13208 10.7812 1.30094 10.7812 1.50943V2.83019H7.21875V1.50943ZM17.4375 2.83019H11.9062V1.50943C11.9062 0.677359 11.2331 0 10.4062 0H7.59375C6.76688 0 6.09375 0.677359 6.09375 1.50943V2.83019H0.5625C0.252187 2.83019 0 3.08302 0 3.39623C0 3.70943 0.252187 3.96226 0.5625 3.96226H1.875V16.6038C1.875 18.4764 3.38906 20 5.25 20H12.75C14.6109 20 16.125 18.4764 16.125 16.6038V3.96226H17.4375C17.7488 3.96226 18 3.70943 18 3.39623C18 3.08302 17.7488 2.83019 17.4375 2.83019Z" fill="#FF4848"/>
-</svg>
-''';
+</svg>''';

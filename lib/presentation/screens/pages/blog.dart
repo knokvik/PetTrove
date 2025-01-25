@@ -17,28 +17,6 @@ class BlogPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Search bar
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 4),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: ' What do you need for your pet?',
-                    focusColor: const Color.fromRGBO(22, 51, 0, 1),
-                    fillColor: const Color.fromRGBO(22, 51, 0, 1),
-                    hoverColor: const Color.fromRGBO(22, 51, 0, 1),
-                    prefixIcon: const Padding(
-                      padding: EdgeInsets.only(left: 18),
-                      child: Icon(
-                        Icons.search,
-                        color: Color.fromRGBO(22, 51, 0, 1),
-                      ),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 25),
-                  ),
-                ),
-              ),
               const SizedBox(height: 16),
 
               // Blog content based on state
@@ -46,7 +24,7 @@ class BlogPage extends StatelessWidget {
                 builder: (context, state) {
                   if (state is BlogLoading) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (state is BlogLoaded) {
+                  } else if (state is BlogLoaded ) {
                     final blogs = state.blogs;
                     if (blogs.isEmpty) {
                       return const Center(child: Text("No blogs available."));

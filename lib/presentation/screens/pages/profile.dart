@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pettrove/data/repository/auth_repository.dart';
 import 'package:pettrove/presentation/screens/auth/login.dart';
+import 'package:pettrove/presentation/screens/pages/_pages/orders.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadUser() async {
     final prefs = await SharedPreferences.getInstance();
     final userData = prefs.getString('currentUser');
+    print(userData);
     if (userData != null) {
       final Map<String, dynamic> user = jsonDecode(userData);
       setState(() {
@@ -57,9 +59,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
             const SizedBox(height: 20),
             ProfileMenu(
-              text: "Cart",
+              text: "Orders",
               icon: Icons.trolley,
-              press: () {},
+              press: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const OrdersScreen()),
+                );
+              },
               bgColor: Colors.white,  // Add this if bgColor is configurable
             ),
             ProfileMenu(

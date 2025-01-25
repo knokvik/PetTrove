@@ -60,6 +60,28 @@ class CartLoaded extends CartState {
         );
 }
 
+class CartSuccess extends CartState {
+  final String message;
+
+  const CartSuccess({
+    required this.message,
+    List<Product> cartItems = const [],
+    double subtotal = 0.0,
+    double shippingFee = 0.0,
+    double discount = 0.0,
+    double total = 0.0,
+  }) : super(
+          cartItems: cartItems,
+          subtotal: subtotal,
+          shippingFee: shippingFee,
+          discount: discount,
+          total: total,
+        );
+
+  @override
+  List<Object?> get props => [message, ...super.props];
+}
+
 class CartError extends CartState {
   final String errorMessage;
 

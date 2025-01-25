@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pettrove/cubit/cart_cubit.dart';
 import 'package:pettrove/cubit/cart_state.dart';
 import 'package:pettrove/models/products.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -134,7 +137,7 @@ class CartCard extends StatelessWidget {
           children: [
             Text(
               product.title,
-              style: const TextStyle(color: Colors.black, fontSize: 16),
+              style: const TextStyle(color: Color.fromRGBO(22, 51, 0, 1), fontSize: 20, fontFamily: "Neue Plak"),
               maxLines: 2,
             ),
             const SizedBox(height: 8),
@@ -206,7 +209,9 @@ class CheckoutCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  _showConfirmationDialog(context);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(159, 232, 112, 1),
                   shape: RoundedRectangleBorder(
@@ -249,6 +254,83 @@ class CheckoutCard extends StatelessWidget {
     );
   }
 }
+
+void _showConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[100],
+        title: const Text("Confirm Checkout",
+        style: TextStyle(
+                fontSize: 22,
+                fontFamily: "Neue Plak",
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.8,
+                color: Color.fromARGB(255, 59, 56, 56),
+              ),),
+        content: const Text("Are you sure you want to proceed with this order?"),
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                      onPressed: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        final userDataString = prefs.getString('currentUser');
+
+                        if (userDataString == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Error: No user is logged in."),
+                            ),
+                          );
+                          return;
+                        }
+
+                        // Decode user data from JSON
+                        final userData = jsonDecode(userDataString);
+
+                        // Get userId from the user data
+                        final userId = userData['id'];
+
+                        if (userId == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Error: Unable to retrieve user ID."),
+                            ),
+                          );
+                          return;
+                        }
+
+                        // Send cart data to the server
+                        BlocProvider.of<CartCubit>(context).sendCartToServer(userId);
+
+                        Navigator.pop( context );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromRGBO(159, 232, 112, 1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(35),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text(
+                        "Confirm",
+                        style: TextStyle(
+                          color: Color.fromRGBO(22, 51, 0, 1),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
 const receiptIcon =
     '''<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">

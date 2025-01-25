@@ -69,8 +69,8 @@ flutter:
   assets:
     # - images/cat.png
     - images/pet.jpeg
-    # - images/splash_1.jpg
-    # - images/splash_2.jpeg
+    - images/splash_1.jpg
+    - images/splash_2.jpeg
 
   fonts:
     - family: Neue Plak

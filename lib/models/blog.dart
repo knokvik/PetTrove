@@ -1,7 +1,6 @@
 
 class Blog {
-  final int id;
-  final int userId;
+  final String userId;
   final String name;
   final String title;
   final String description;
@@ -9,7 +8,6 @@ class Blog {
   final DateTime date;
 
   Blog({
-    required this.id,
     required this.userId,
     required this.name,
     required this.title,
@@ -21,9 +19,8 @@ class Blog {
   // Convert Blog to JSON
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'userId': userId,
-      'name': name,
+      'name' : name,
       'title': title,
       'description': description,
       'imagePath': imagePath,
@@ -34,9 +31,8 @@ class Blog {
   // Create Blog from JSON
   factory Blog.fromJson(Map<String, dynamic> json) {
     return Blog(
-      id: json['id'],
       userId: json['userId'],
-      name: json['name'],
+      name : json['name'],
       title: json['title'],
       description: json['description'],
       imagePath: json['imagePath'],

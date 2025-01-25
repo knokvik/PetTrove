@@ -28,3 +28,14 @@ class BlogError extends BlogState {
   @override
   List<Object?> get props => [message];
 }
+
+class BlogUpdating extends BlogState {}
+
+class BlogUpdated extends BlogState {
+  final Blog blog;
+
+  const BlogUpdated(this.blog);
+
+  @override
+  List<Object?> get props => [blog];
+}

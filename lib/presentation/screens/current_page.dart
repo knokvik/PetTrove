@@ -42,6 +42,7 @@ class _CurrentPageState extends State<CurrentPage> {
   final List<Widget> pages = [
     Center(child: Home(productRepository: ProductRepository())),
     Center(child: BlogPage()),
+    Center(child: ComposeBlogPage()),
     Center(child: CartScreen()),
     Center(child: ProfileScreen()),
   ];
@@ -100,7 +101,7 @@ class _CurrentPageState extends State<CurrentPage> {
           ),
           actions: [
             Padding(
-              padding: const EdgeInsets.only(right: 20),
+              padding: const EdgeInsets.only(right: 24 , top: 6),
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 3.5 , vertical: 3),
                 decoration: BoxDecoration(
@@ -177,7 +178,7 @@ class _CurrentPageState extends State<CurrentPage> {
         child: Material(
           color: Colors.transparent,
           child: Container(
-            constraints: BoxConstraints(
+            constraints: BoxConstraints(  
               maxWidth: MediaQuery.of(context).size.width * 0.9, // 90% of screen width
               maxHeight: MediaQuery.of(context).size.height * 0.6, // 80% of screen height
             ),
@@ -207,7 +208,7 @@ class _CurrentPageState extends State<CurrentPage> {
   
   return GestureDetector(
     onTap: () {
-      index == 2 ? showComposeBlogDialog(context) : context.read<HomePageCubit>().updateIndex(index);
+    context.read<HomePageCubit>().updateIndex(index);
     },
     child: AnimatedContainer(
       duration: Duration(milliseconds: 200),

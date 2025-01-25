@@ -6,6 +6,8 @@ import 'package:pettrove/data/repository/product_repository.dart';
 import 'package:pettrove/models/products.dart';
 import 'package:pettrove/presentation/screens/pages/_pages/pet.dart';
 import 'package:pettrove/presentation/screens/pages/_pages/product.dart';
+import 'package:pettrove/presentation/screens/pages/_pages/search.dart';
+import 'package:pettrove/presentation/screens/pages/_pages/searchbar.dart';
 
 class Home extends StatelessWidget {
   final ProductRepository productRepository;
@@ -58,10 +60,19 @@ class Home extends StatelessWidget {
                   ],
                 ),
                 child: TextField(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductSearchPage(),
+                      ),
+                    );
+                  },
+                  readOnly: true,
                   decoration: InputDecoration(
                     hintText: '   What do you need for your pet?',
                     hintStyle: TextStyle(
-                      color: const Color.fromARGB(255, 83, 83, 83),
+                      color: const Color.fromARGB(255, 59, 59, 59),
                       fontSize: 15,
                     ),
                     prefixIcon: Padding(
@@ -74,7 +85,7 @@ class Home extends StatelessWidget {
                         padding: EdgeInsets.all(15),
                         child: Icon(
                           Icons.search,
-                          color: const Color.fromARGB(205, 34, 33, 33),
+                          color: const Color.fromARGB(192, 16, 16, 16),
                         ),
                       ),
                     ),

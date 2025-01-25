@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pettrove/models/products.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,6 +44,52 @@ class CartCubit extends Cubit<CartState> {
   } catch (e, stackTrace) {
     print("Error loading cart: $e\n$stackTrace");
     emit(CartError(errorMessage: "Failed to load cart"));
+  }
+}
+Future<void> sendCartToServer(String userId) async {
+  if (state is CartLoaded) {
+    final currentState = state as CartLoaded;
+
+    if (currentState.cartItems.isEmpty) {
+      print("Cart is empty. Nothing to send to the server.");
+      emit(CartError(errorMessage: "Cart is empty. Cannot send to server."));
+      return;
+    }
+
+    try {
+      final url = Uri.parse('https://clever-shape-81254.pktriot.net/api/cart'); // Replace with your actual endpoint
+
+      // Prepare the cart data with userId
+      final cartData = {
+        'userId': userId, // Include the userId in the request payload
+        'cartItems': currentState.cartItems.map((item) => item.toJson()).toList(),
+      };
+
+      // Send the data to the server
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(cartData),
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        print("Cart saved successfully on the server: $responseBody");
+
+      } else {
+        print("Failed to save cart. Server responded with status: ${response.statusCode}");
+        print("Response body: ${response.body}");
+        emit(CartError(
+          errorMessage: "Failed to save cart. Server responded with status: ${response.statusCode}",
+        ));
+      }
+    } catch (e) {
+      print("Error sending cart to server: $e");
+      emit(CartError(errorMessage: "Error sending cart to server: $e"));
+    }
+  } else {
+    print("Cart is not loaded. Cannot send to server.");
+    emit(CartError(errorMessage: "Cart is not loaded. Cannot send to server."));
   }
 }
 

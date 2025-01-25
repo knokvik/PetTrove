@@ -16,13 +16,24 @@ class BlogCubit extends Cubit<BlogState> {
   Future<void> fetchBlogs() async {
     emit(BlogLoading());
     try {
-      final blogs = await blogRepository.fetchBlogs(); // Fetch blogs from repository
+      final blogs = await blogRepository.fetchBlogs(); 
+      print(blogs);
       emit(BlogLoaded(blogs));
     } catch (e) {
       emit(BlogError('Failed to fetch blogs: $e'));
     }
   }
 
+   Future<void> updateBlog(Blog blog) async {
+    emit(BlogUpdating()); 
+    try {
+      final updatedBlog = await blogRepository.updateBlog(blog);
+      emit(BlogUpdated(updatedBlog));
+      fetchBlogs(); 
+    } catch (e) {
+      emit(BlogError('Failed to update blog: $e'));
+    }
+  }
   // Add a new blog
   // Future<void> addBlog(Blog blog) async {
   //   if (state is BlogLoaded) {

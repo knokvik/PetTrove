@@ -42,8 +42,7 @@ class _ComposeBlogPageState extends State<ComposeBlogPage> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: screenWidth * 0.05, // 5% of screen width for padding
-            vertical: 16.0,
+            horizontal: screenWidth * 0.02, // 5% of screen width for padding
           ),
           child: SingleChildScrollView(
             child: Column(

@@ -29,9 +29,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xFFF5F6F9),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F6F9),
+        backgroundColor: Colors.white,
         shadowColor: const Color.fromARGB(0, 245, 246, 249),
         foregroundColor: const Color(0xFFF5F6F9),
         surfaceTintColor: Colors.transparent,

@@ -46,6 +46,11 @@ dependencies:
   webview_flutter_android: ^4.3.1
   webview_flutter_wkwebview: ^3.17.0
   image_picker: ^1.1.2
+  geolocator: ^13.0.2
+  google_places_flutter: ^2.0.9
+  flutter_chat_ui: ^1.6.15
+  flutter_chat_types: ^3.6.2
+  flutter_local_notifications: ^18.0.1
 
 dev_dependencies:
   flutter_test:

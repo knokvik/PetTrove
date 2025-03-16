@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pettrove/bloc/auth/auth_bloc.dart';
 import 'package:pettrove/bloc/auth/auth_event.dart';
 import 'package:pettrove/bloc/auth/auth_state.dart';
+import 'package:pettrove/data/repository/auth_repository.dart';
+import 'package:pettrove/models/pets.dart';
+import 'package:pettrove/presentation/screens/auth/_auth/otp.dart';
 import 'package:pettrove/presentation/screens/auth/login.dart';
 import 'package:pettrove/presentation/screens/current_page.dart';
 
@@ -112,6 +115,28 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
 
+  List<String> selectedPets = [];
+    bool isLoading = false;
+
+
+  final List<String> petOptions = ['Dog', 'Cat', 'Rabbit', 'Bird'];
+
+  void togglePetSelection(String pet) {
+    setState(() {
+      if (selectedPets.contains(pet)) {
+        selectedPets.remove(pet);
+      } else {
+        if (selectedPets.length < 4) {
+          selectedPets.add(pet);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("You can select up to 4 pets only")),
+          );
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<RegisterBloc, RegisterState>(
@@ -218,34 +243,120 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
               ),
             ),
             const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: () {
-                final name = nameController.text;
-                final email = emailController.text;
-                final password = passwordController.text;
-                final phone = phoneController.text;
 
-                context.read<RegisterBloc>().add(RegisterSubmitted(
-                  name: name,
-                  email: email,
-                  password: password,
-                  phone: phone,
-                ));
-              },
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: Color.fromRGBO(158, 232, 112, 1),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 48),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(35)),
+            // ✅ Pet Selection Section
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Select Your Pets (Up to 4)",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromRGBO(22, 51, 0, 1),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: const Text("Continue", style: TextStyle(color: Colors.black)),
-              ),
             ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: petOptions.map((pet) {
+                final isSelected = selectedPets.contains(pet);
+                return GestureDetector(
+                  onTap: () => togglePetSelection(pet),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color.fromRGBO(140, 207, 99, 1)
+                          : Colors.grey[300],
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Text(
+                      pet,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+                        const SizedBox(height: 24),
+
+            BlocBuilder<RegisterBloc, RegisterState>(
+            builder: (context, state) {
+              return isLoading
+              ? const Center(child: CircularProgressIndicator())
+              :
+              ElevatedButton(
+                onPressed: () async {
+                  if (!state.isVerified) {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    // ✅ Trigger Email Verification
+                    bool response = await AuthRepository().mailVerification(emailController.text);
+                    setState(() {
+                      isLoading = false;
+                    });
+                    if (response) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OtpScreen(email: emailController.text, type: "Verify"),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Email verification failed")),
+                      );
+                    }
+                  } else {
+                    // ✅ Perform Registration after verification
+                    final name = nameController.text;
+                    final email = emailController.text;
+                    final password = passwordController.text;
+                    final phone = phoneController.text;
+
+                    final pets = selectedPets.map((petName) => Pet(
+                    id: '',
+                    name: petName,
+                    vaccinationCount: 0,
+                    checkupCount: 0,
+                    exerciseCount: 0,
+                    feedingCount: 0,
+                  )).toList();
+
+                    context.read<RegisterBloc>().add(RegisterSubmitted(
+                      name: name,
+                      email: email,
+                      password: password,
+                      phone: phone,
+                      pets: pets,
+                    ));
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor: const Color.fromRGBO(158, 232, 112, 1),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(35)),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    state.isVerified ? "Continue" : "Verify Email", // 
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                ),
+              );
+            },
+          )
           ],
         ),
       ),

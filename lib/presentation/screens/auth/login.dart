@@ -43,26 +43,26 @@ class SignInScreen extends StatelessWidget {
                     SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                     SignInForm(),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SocalCard(
-                          icon: SvgPicture.string(googleIcon),
-                          press: () {},
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: SocalCard(
-                            icon: SvgPicture.string(facebookIcon),
-                            press: () {},
-                          ),
-                        ),
-                        SocalCard(
-                          icon: SvgPicture.string(twitterIcon),
-                          press: () {},
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     SocalCard(
+                    //       icon: SvgPicture.string(googleIcon),
+                    //       press: () {},
+                    //     ),
+                    //     Padding(
+                    //       padding: const EdgeInsets.symmetric(horizontal: 16),
+                    //       child: SocalCard(
+                    //         icon: SvgPicture.string(facebookIcon),
+                    //         press: () {},
+                    //       ),
+                    //     ),
+                    //     SocalCard(
+                    //       icon: SvgPicture.string(twitterIcon),
+                    //       press: () {},
+                    //     ),
+                    //   ],
+                    // ),
                     const SizedBox(height: 16),
                     const NoAccountText(),
                      GestureDetector(
@@ -214,34 +214,6 @@ class SignInForm extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class SocalCard extends StatelessWidget {
-  const SocalCard({
-    Key? key,
-    required this.icon,
-    required this.press,
-  }) : super(key: key);
-
-  final Widget icon;
-  final VoidCallback press;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: press,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        height: 56,
-        width: 56,
-        decoration: const BoxDecoration(
-          color: Color(0xFFF5F6F9),
-          shape: BoxShape.circle,
-        ),
-        child: icon,
       ),
     );
   }

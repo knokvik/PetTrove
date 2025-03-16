@@ -1,9 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pettrove/bloc/auth/auth_bloc.dart';
+import 'package:pettrove/bloc/auth/auth_event.dart';
 import 'package:pettrove/data/repository/auth_repository.dart';
 import 'package:pettrove/presentation/screens/auth/login.dart';
+import 'package:pettrove/presentation/screens/pages/_pages/about.dart';
+import 'package:pettrove/presentation/screens/pages/_pages/manage-pets.dart';
 import 'package:pettrove/presentation/screens/pages/_pages/orders.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,17 +30,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userData = prefs.getString('currentUser');
-    print(userData);
-    if (userData != null) {
-      final Map<String, dynamic> user = jsonDecode(userData);
-      setState(() {
-        currentUser = user['name'] ?? "Unknown User";
-      });
+  final prefs = await SharedPreferences.getInstance();
+  final userData = prefs.getString('currentUser');
+  if (userData != null) {
+    final Map<String, dynamic> user = jsonDecode(userData);
+    String name = user['name'] ?? "Unknown User";
+    if (name.isNotEmpty) {
+      name = name[0].toUpperCase() + name.substring(1);
     }
+    setState(() {
+      currentUser = name;
+    });
   }
-
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,21 +77,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
               bgColor: Colors.white,  // Add this if bgColor is configurable
             ),
             ProfileMenu(
-              text: "Notifications",
-              icon: Icons.notifications_outlined,
-              press: () {},
+              text: "Manage Pets",
+              icon: Icons.pets,
+              press: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ManagePetsScreen()),
+                );
+              },
               bgColor: Colors.white,
             ),
             ProfileMenu(
-              text: "Blogs",
-              icon: Icons.newspaper_outlined,
-              press: () {},
+              text: "About",
+              icon: Icons.info_outlined,
+              press: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => WelcomePage()),
+                );
+              },
               bgColor: Colors.white,
             ),
             ProfileMenu(
               text: "Log Out",
               icon: Icons.logout_outlined,
               press: () {
+                context.read<RegisterBloc>().add(ResetVerificationStatus());
                 AuthRepository().logout();
                 Navigator.pushAndRemoveUntil(
                 context,
@@ -181,7 +199,7 @@ class ProfileMenu extends StatelessWidget {
               shape: BoxShape.circle,
             ),
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(10.0),
                 child: Icon(
                   icon,
                   size: 27,

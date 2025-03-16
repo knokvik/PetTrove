@@ -7,7 +7,7 @@ class BlogRepository {
 
   Future<List<Blog>> fetchBlogs() async {
     try {
-      final url = Uri.parse('https://clever-shape-81254.pktriot.net/api/blogs'); // Replace with your actual blog API endpoint.
+      final url = Uri.parse('https://clever-shape-81254.pktriot.net/blog/'); // Replace with your actual blog API endpoint.
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -24,7 +24,7 @@ class BlogRepository {
 
     Future<Blog> updateBlog(Blog blog) async {
     final response = await http.post(
-      Uri.parse('https://clever-shape-81254.pktriot.net/upload-blog'),
+      Uri.parse('https://clever-shape-81254.pktriot.net/blog/upload/'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(blog.toJson()),
     );

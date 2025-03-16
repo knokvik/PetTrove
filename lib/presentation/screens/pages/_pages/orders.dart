@@ -38,7 +38,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final userId = userData['id'];
 
     final url = Uri.parse(
-        'https://clever-shape-81254.pktriot.net/api/orders?userId=$userId');
+        'https://clever-shape-81254.pktriot.net/order/?userId=$userId');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {

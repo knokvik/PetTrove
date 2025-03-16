@@ -57,7 +57,7 @@ Future<void> sendCartToServer(String userId) async {
     }
 
     try {
-      final url = Uri.parse('https://clever-shape-81254.pktriot.net/api/cart'); // Replace with your actual endpoint
+      final url = Uri.parse('https://clever-shape-81254.pktriot.net/order/cart'); // Replace with your actual endpoint
 
       // Prepare the cart data with userId
       final cartData = {

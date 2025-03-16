@@ -48,36 +48,44 @@ class LoginState extends Equatable {
 }
 
 // register_state.dart
-class RegisterState {
+class RegisterState{
+  final bool isVerifying;
   final bool isSubmitting;
   final bool isSuccess;
   final bool isFailure;
+  final bool isVerified; // ✅ Add this
 
   const RegisterState({
+    required this.isVerifying,
     required this.isSubmitting,
     required this.isSuccess,
     required this.isFailure,
+    required this.isVerified, // ✅ Initialize
   });
 
-  // Factory constructor for initial state
   factory RegisterState.initial() {
     return const RegisterState(
+      isVerifying: false,
       isSubmitting: false,
       isSuccess: false,
       isFailure: false,
+      isVerified: false, // ✅ Set default false
     );
   }
 
-  // Copy with method to modify state values
   RegisterState copyWith({
+    bool? isVerifying,
     bool? isSubmitting,
     bool? isSuccess,
     bool? isFailure,
+    bool? isVerified, // ✅ Allow updating verified state
   }) {
     return RegisterState(
+      isVerifying: isVerifying ?? this.isVerifying,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isSuccess: isSuccess ?? this.isSuccess,
       isFailure: isFailure ?? this.isFailure,
+      isVerified: isVerified ?? this.isVerified, // ✅ Keep or update verification status
     );
   }
 }

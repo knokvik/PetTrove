@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pettrove/presentation/screens/auth/login.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -45,7 +46,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => SignInScreen()),
+            (route) => false, // This removes all previous routes
+          );
+
+            },
             style: ElevatedButton.styleFrom(
               elevation: 0,
               backgroundColor: Color.fromRGBO(158, 232, 112, 1),

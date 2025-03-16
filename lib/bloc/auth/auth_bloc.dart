@@ -42,6 +42,16 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   final AuthRepository authRepository;
 
   RegisterBloc({required this.authRepository}) : super(RegisterState.initial()) {
+
+    on<ResetVerificationStatus>((event, emit) {
+  emit(state.copyWith(isVerifying: false));
+});
+
+
+    on<VerificationCompleted>((event, emit) {
+      emit(state.copyWith(isVerified: true)); // ✅ Update isVerified to true
+    });
+
     on<RegisterSubmitted>((event, emit) async {
       emit(state.copyWith(isSubmitting: true));
 
@@ -51,6 +61,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
           email: event.email,
           password: event.password,
           phone: event.phone,
+          pets : event.pets
         );
 
         if (isSuccess) {
@@ -58,7 +69,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
         } else {
           emit(state.copyWith(isSubmitting: false, isFailure: true));
         }
-      } catch (_) {
+      } catch (e) {
         emit(state.copyWith(isSubmitting: false, isFailure: true));
       }
     });

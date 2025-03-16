@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:pettrove/models/pets.dart';
 
 abstract class LoginEvent extends Equatable {
   const LoginEvent();
@@ -37,11 +38,17 @@ class RegisterSubmitted extends RegisterEvent {
   final String email;
   final String password;
   final String phone;
+  List<Pet> pets;
 
   RegisterSubmitted({
     required this.name,
     required this.email,
     required this.password,
     required this.phone,
+    required this.pets
   });
 }
+
+class VerificationCompleted extends RegisterEvent {} // ✅ New event
+
+class ResetVerificationStatus extends RegisterEvent {}

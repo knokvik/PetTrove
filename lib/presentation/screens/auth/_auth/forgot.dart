@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pettrove/data/repository/auth_repository.dart';
+import 'package:pettrove/presentation/screens/auth/_auth/otp.dart';
 import 'package:pettrove/presentation/screens/auth/login.dart';
 
 const authOutlineInputBorder = OutlineInputBorder(
-borderSide: BorderSide(color: Color(0xFF757575)),
-borderRadius: BorderRadius.all(Radius.circular(100)),
+  borderSide: BorderSide(color: Color(0xFF757575)),
+  borderRadius: BorderRadius.all(Radius.circular(100)),
 );
 
-class ForgotPasswordScreen extends StatelessWidget {
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
+
+  @override
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController emailController = TextEditingController();
+  final AuthRepository authRepository = AuthRepository();
+  bool isLoading = false;
 
-  ForgotPasswordScreen({super.key});
-
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,48 +35,73 @@ class ForgotPasswordScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Form(
               key: _formKey,
-              child:  TextFormField(
-            onSaved: (email) {},
-            onChanged: (email) {},
-            textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
-                hintText: "Enter your email",
-                labelText: "Email",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                hintStyle: const TextStyle(color: Color(0xFF757575)),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
+              child: TextFormField(
+                controller: emailController,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  hintText: "Enter your email",
+                  labelText: "Email",
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  hintStyle: const TextStyle(color: Color(0xFF757575)),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  border: authOutlineInputBorder,
+                  enabledBorder: authOutlineInputBorder,
+                  focusedBorder: authOutlineInputBorder.copyWith(
+                      borderSide: const BorderSide(
+                          color: Color.fromRGBO(140, 207, 99, 1))),
                 ),
-                border: authOutlineInputBorder,
-                enabledBorder: authOutlineInputBorder,
-                focusedBorder: authOutlineInputBorder.copyWith(
-                    borderSide: const BorderSide(color: Color.fromRGBO(140, 207, 99, 1),))),
-          ),
+              ),
             ),
           ),
           SizedBox(height: 7),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                // Handle next step after validation
-              }
-            },
-             style: ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: const Color.fromRGBO(158, 232, 112, 1),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 48),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(35)),
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ElevatedButton(
+                  onPressed: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    Map<String, dynamic> result =
+                        await authRepository.sendForgetRequest(emailController.text);
+                    setState(() {
+                      isLoading = false;
+                    });
+                    if (result["success"]) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OtpScreen(
+                            email: emailController.text,
+                            type: "Reset",
+                          ),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Unable to send mail")),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color.fromRGBO(158, 232, 112, 1),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(35)),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: const Text(
+                      "Next",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
                 ),
-              ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: const Text("Next",style: TextStyle(color: Colors.black),),
-            ),
-          ),
           SizedBox(height: 16),
           ExistingAccountText(),
         ],
@@ -85,7 +119,7 @@ class LogoWithTitle extends StatelessWidget {
       required this.title,
       this.subText = '',
       required this.children});
-  
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -98,11 +132,11 @@ class LogoWithTitle extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                        color: Color.fromRGBO(22, 51, 0, 1),
-                        fontSize: 36,
-                        fontFamily: "Neue Plak",
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: Color.fromRGBO(22, 51, 0, 1),
+                    fontSize: 36,
+                    fontFamily: "Neue Plak",
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),

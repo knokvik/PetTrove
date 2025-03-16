@@ -5,10 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pettrove/cubit/pages.dart';
 import 'package:pettrove/cubit/products.dart';
 import 'package:pettrove/data/repository/product_repository.dart';
+import 'package:pettrove/presentation/screens/pages/_pages/about.dart';
+import 'package:pettrove/presentation/screens/pages/_pages/pet_page.dart';
 import 'package:pettrove/presentation/screens/pages/_pages/upload.dart';
 import 'package:pettrove/presentation/screens/pages/blog.dart';
 import 'package:pettrove/presentation/screens/pages/cart.dart';
 import 'package:pettrove/presentation/screens/pages/home.dart';
+import 'package:pettrove/presentation/screens/pages/maps.dart';
 import 'package:pettrove/presentation/screens/pages/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,21 +31,25 @@ class _CurrentPageState extends State<CurrentPage> {
     _loadUser();
   }
 
-  Future<void> _loadUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userData = prefs.getString('currentUser');
-    if (userData != null) {
-      final Map<String, dynamic> user = jsonDecode(userData);
-      setState(() {
-        currentUser = user['name'] ?? "Unknown User";
-      });
+Future<void> _loadUser() async {
+  final prefs = await SharedPreferences.getInstance();
+  final userData = prefs.getString('currentUser');
+  if (userData != null) {
+    final Map<String, dynamic> user = jsonDecode(userData);
+    String name = user['name'] ?? "Unknown User";
+    if (name.isNotEmpty) {
+      name = name[0].toUpperCase() + name.substring(1);
     }
+    setState(() {
+      currentUser = name;
+    });
   }
+}
 
   final List<Widget> pages = [
     Center(child: Home(productRepository: ProductRepository())),
     Center(child: BlogPage()),
-    Center(child: ComposeBlogPage()),
+    Center(child: PetPage()),
     Center(child: CartScreen()),
     Center(child: ProfileScreen()),
   ];
@@ -117,9 +124,12 @@ class _CurrentPageState extends State<CurrentPage> {
                   ],
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.notifications_outlined, color: Color.fromRGBO(22, 51, 0, 1), size: 25),
+                  icon: Icon(Icons.info_outlined, color: Color.fromRGBO(22, 51, 0, 1), size: 25),
                   onPressed: () {
-                    // Navigator.push to notifications page (if needed)
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => WelcomePage()),
+                  );
                   },
                 ),
               ),
@@ -179,8 +189,8 @@ class _CurrentPageState extends State<CurrentPage> {
           color: Colors.transparent,
           child: Container(
             constraints: BoxConstraints(  
-              maxWidth: MediaQuery.of(context).size.width * 0.9, // 90% of screen width
-              maxHeight: MediaQuery.of(context).size.height * 0.6, // 80% of screen height
+              maxWidth: MediaQuery.of(context).size.width * 0.9,
+              maxHeight: MediaQuery.of(context).size.height * 0.6, 
             ),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -220,8 +230,8 @@ class _CurrentPageState extends State<CurrentPage> {
       ),
       child: Icon(
         icon,
-        size: index == 2 ? 30 : 30,  // Increase icon size
-        color: Color.fromRGBO(22, 51, 0, 1)  ,
+        size: index == 2 ? 30 : 30, 
+        color: Color.fromRGBO(22, 51, 0, 1),
       ),
     ),
   );

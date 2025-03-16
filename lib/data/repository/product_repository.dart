@@ -7,7 +7,7 @@ import 'package:pettrove/models/products.dart';
     // Simulated API call (replace with actual HTTP request)
     Future<List<Product>> fetchProducts() async {
       try {
-        final url = Uri.parse('https://clever-shape-81254.pktriot.net/api/products');
+        final url = Uri.parse('https://clever-shape-81254.pktriot.net/product/');
 
         final response = await http.get(url);
         

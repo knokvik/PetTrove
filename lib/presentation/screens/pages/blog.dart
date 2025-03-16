@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pettrove/cubit/blog_cubit.dart';
+import 'package:pettrove/data/repository/auth_repository.dart';
 import 'package:pettrove/models/blog.dart';
+import 'package:pettrove/presentation/screens/pages/_pages/upload.dart';
 
 class BlogPage extends StatelessWidget {
   const BlogPage({super.key});
@@ -10,43 +12,102 @@ class BlogPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100], // Matches AppBar and body background
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Search bar
-              const SizedBox(height: 16),
-
-              // Blog content based on state
-              BlocBuilder<BlogCubit, BlogState>(
-                builder: (context, state) {
-                  if (state is BlogLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is BlogLoaded ) {
-                    final blogs = state.blogs;
-                    if (blogs.isEmpty) {
-                      return const Center(child: Text("No blogs available."));
-                    }
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: blogs.length,
-                      itemBuilder: (context, index) {
-                        return BlogCard(blog: blogs[index]);
+      body: Stack(
+        children: [
+          RefreshIndicator(
+            onRefresh: () async {
+              context.read<BlogCubit>().fetchBlogs(); // Trigger refresh
+            },
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Search bar
+                    const SizedBox(height: 16),
+                    // Blog content based on state
+                    BlocBuilder<BlogCubit, BlogState>(
+                      builder: (context, state) {
+                        if (state is BlogLoading) {
+                          return const Center(child: CircularProgressIndicator());
+                        } else if (state is BlogLoaded ) {
+                          final blogs = state.blogs;
+                          if (blogs.isEmpty) {
+                            return const Center(child: Text("No blogs available."));
+                          }
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: blogs.length,
+                            itemBuilder: (context, index) {
+                              return BlogCard(blog: blogs[index]);
+                            },
+                          );
+                        } else if (state is BlogError) {
+                          return Center(child: Text(state.message));
+                        }
+                        return const Center(child: Text("Something went wrong."));
                       },
-                    );
-                  } else if (state is BlogError) {
-                    return Center(child: Text(state.message));
-                  }
-                  return const Center(child: Text("Something went wrong."));
-                },
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        showGeneralDialog(
+          context: context,
+          barrierDismissible: true,
+          barrierLabel: '',
+          transitionDuration: const Duration(milliseconds: 300),
+          pageBuilder: (context, animation, secondaryAnimation) {
+            return FadeTransition(
+              opacity: animation,
+              child: Center(
+                child: SizedBox(
+                  child: Dialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(35),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(35),
+                      child: Container(
+                        color: Colors.grey[100],
+                        height: 530,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: ComposeBlogPage(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        width: 55,
+        height: 55,
+        decoration: BoxDecoration(
+          color: Color.fromRGBO(159, 232, 112, 1), // Light green
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.add,
+          size: 30,
+          color: Color.fromRGBO(22, 51, 0, 1), // Dark green
         ),
       ),
+    ),
     );
   }
 }
@@ -67,44 +128,48 @@ class BlogCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(50)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(35)),
-              child: Image.network(
-                blog.imagePath,
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
+  height: 200, // Fixed height
+  width: double.infinity,
+  child: ClipRRect(
+    borderRadius: const BorderRadius.all(Radius.circular(35)),
+    child: Image.network(
+      blog.imagePath,
+      fit: BoxFit.cover,
+      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null) {
+          return child; // Image has finished loading
+        }
+        return const Center(child: CircularProgressIndicator()); // Show a standard circular progress bar
+      },
+      errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+        return Center(
+          child: Icon(
+            Icons.broken_image,
+            color: Colors.grey,
+            size: 50,
           ),
+        );
+      },
+    ),
+  ),
+),
+
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   blog.title,
                   style: const TextStyle(
-                    fontSize: 22,
+                    fontSize: 24,
                     fontWeight: FontWeight.w600,
                     fontFamily: "Neue Plak",
                     letterSpacing: 1.2,
                     color: Color.fromARGB(255, 54, 54, 54),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 2),
                 Text(
                   blog.description,
                   maxLines: 8,
@@ -149,8 +214,11 @@ class BlogDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text(blog.title),
+        backgroundColor: Colors.grey[100],
+        title: Text(blog.title,style: TextStyle(fontFamily: "Neue Plak"),),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -158,7 +226,7 @@ class BlogDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(35),
               child: Image.network(
                 blog.imagePath,
                 height: 200,
@@ -170,6 +238,7 @@ class BlogDetailPage extends StatelessWidget {
             Text(
               blog.title,
               style: const TextStyle(
+                fontFamily: "Neue Plak",
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -182,6 +251,7 @@ class BlogDetailPage extends StatelessWidget {
           ],
         ),
       ),
+      
     );
   }
 }

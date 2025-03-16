@@ -220,7 +220,7 @@ class Home extends StatelessWidget {
                 }
               },
             ),
-              SizedBox(height: 20),
+              SizedBox(height: 20), 
             ],
           ),
         ),
@@ -288,6 +288,7 @@ class Home extends StatelessWidget {
             }).toList(),
           ),
         ),
+        
       ],
     );
   }

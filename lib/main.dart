@@ -14,7 +14,7 @@ import 'package:pettrove/presentation/screens/pages/splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure initialization before using shared preferences
+  WidgetsFlutterBinding.ensureInitialized(); 
   runApp(const MyApp());
 }
 
